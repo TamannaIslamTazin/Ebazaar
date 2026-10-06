@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ebazaar – Bangladesh Online Marketplace</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Landing / Role Selection -->
+    <section id="landing" class="screen active">
+      <div class="hero">
+        <div class="logo">🛍️ Ebazaar</div>
+        <p class="tagline">বাংলাদেশের নিজস্ব অনলাইন মার্কেটপ্লেস — Ebazaar</p>
+        <p class="subtitle">Buy & Sell Locally • Shop Rating • Nearby Priority</p>
+        <div class="role-cards">
+          <button class="role-card merchant" onclick="chooseRole('merchant')">
+            <span class="icon">🏪</span>
+            <h2>Merchant Account</h2>
+            <p>Open your shop • Sell products • Manage orders</p>
+            <span class="badge">৳100 / month</span>
+          </button>
+          <button class="role-card customer" onclick="chooseRole('customer')">
+            <span class="icon">🛒</span>
+            <h2>Customer Account</h2>
+            <p>Search products • Order from shops • Rate quality</p>
+            <span class="badge free">Free</span>
+          </button>
+        </div>
+        <div class="demo-hint">
+          <strong>Demo Login (Phone + Password)</strong><br/>
+          Merchant: <code>01711111111</code> / <code>pass123</code><br/>
+          Merchant: <code>01822222222</code> / <code>pass123</code> &nbsp;|&nbsp; <code>01933333333</code> / <code>pass123</code><br/>
+          Customer: <code>01644444444</code> / <code>pass123</code> &nbsp;|&nbsp; <code>01555555555</code> / <code>pass123</code><br/>
+          <button type="button" class="btn small" style="margin-top:0.75rem" onclick="resetAppData()">Reset demo data</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Auth Screen -->
+    <section id="auth" class="screen">
+      <div class="auth-box">
+        <button class="back-btn" onclick="showScreen('landing')">← Back</button>
+        <h2 id="auth-title">Login</h2>
+        <div class="tabs">
+          <button class="tab active" data-tab="login" onclick="switchAuthTab('login')">Login</button>
+          <button class="tab" data-tab="register" onclick="switchAuthTab('register')">Register</button>
+        </div>
+        <form id="auth-form" onsubmit="handleAuth(event)">
+          <input type="tel" id="auth-phone" placeholder="Phone number (01XXXXXXXXX)" required autocomplete="tel" />
+          <input type="password" id="auth-password" placeholder="Password" required autocomplete="current-password" />
+          <input type="text" id="auth-name" placeholder="Full Name" class="reg-only" style="display:none" />
+          <button type="submit" class="btn primary" id="auth-submit">Login</button>
+        </form>
+        <p class="auth-note" id="auth-note"></p>
+      </div>
+    </section>
+
+    <!-- Merchant Subscription Lock -->
+    <section id="merchant-lock" class="screen">
+      <div class="lock-box">
+        <h2>🔓 Unlock Your Merchant Store</h2>
+        <p>Pay <strong>৳100</strong> for 1 month subscription to open your personalised shop.</p>
+        <div class="price-card">
+          <div class="amount">৳100</div>
+          <div class="period">Valid for 30 days</div>
+        </div>
+        <p class="demo-note">This is a <strong>DEMO</strong> payment. Click below to simulate payment of 100 Taka.</p>
+        <button class="btn primary large" onclick="demoPaySubscription()">Pay ৳100 (Demo Unlock)</button>
+        <button class="btn ghost" onclick="logout()">Logout</button>
+      </div>
+    </section>
+
+    <!-- Merchant Dashboard -->
+    <section id="merchant-dash" class="screen">
+      <header class="topbar">
+        <div class="brand">🛍️ Ebazaar <span class="role-tag">Merchant</span></div>
+        <div class="user-info">
+          <span id="m-shop-name">My Shop</span>
+          <button class="btn small" onclick="logout()">Logout</button>
+        </div>
+      </header>
+      <nav class="tabs-nav">
+        <button class="nav-tab active" data-panel="m-setup" onclick="showMerchantPanel('m-setup')">Shop Setup</button>
+        <button class="nav-tab" data-panel="m-products" onclick="showMerchantPanel('m-products')">Products</button>
+        <button class="nav-tab" data-panel="m-orders" onclick="showMerchantPanel('m-orders')">Orders <span id="m-order-badge" class="badge-count hidden">0</span></button>
+        <button class="nav-tab" data-panel="m-stats" onclick="showMerchantPanel('m-stats')">Sales & Stats</button>
+      </nav>
+
+      <div id="m-setup" class="panel active">
+        <h3>Shop Profile</h3>
+        <form id="shop-form" onsubmit="saveShop(event)" class="form-grid">
+          <label>Shop Name <input type="text" id="shop-name" required /></label>
+          <label>Owner Name <input type="text" id="shop-owner" required /></label>
+          <label>Phone <input type="tel" id="shop-phone" required /></label>
+          <label>Address <input type="text" id="shop-address" required /></label>
+          <label>Shop Type
+            <select id="shop-type">
+              <option>Grocery</option>
+              <option>Electronics</option>
+              <option>Clothing</option>
+              <option>Food & Restaurant</option>
+              <option>Pharmacy</option>
+              <option>Books & Stationery</option>
+              <option>Other</option>
+            </select>
+          </label>
+          <label>Location (Area)
+            <select id="shop-location">
+              <option value="Dhanmondi">Dhanmondi, Dhaka</option>
+              <option value="Gulshan">Gulshan, Dhaka</option>
+              <option value="Mirpur">Mirpur, Dhaka</option>
+              <option value="Uttara">Uttara, Dhaka</option>
+              <option value="Banani">Banani, Dhaka</option>
+              <option value="Mohakhali">Mohakhali, Dhaka</option>
+              <option value="Chittagong">Chittagong</option>
+              <option value="Sylhet">Sylhet</option>
+            </select>
+          </label>
+          <button type="submit" class="btn primary">Save Shop Info</button>
+        </form>
+        <div id="shop-saved-msg" class="success-msg hidden">Shop saved successfully!</div>
+        <div class="sub-info">
+          Subscription: <span id="sub-status">Active</span> • Expires: <span id="sub-expiry">—</span>
+        </div>
+      </div>
+
+      <div id="m-products" class="panel">
+        <h3>Your Products</h3>
+        <form id="product-form" onsubmit="addProduct(event)" class="product-form">
+          <input type="text" id="prod-name" placeholder="Product name" required />
+          <input type="number" id="prod-price" placeholder="Price (৳)" min="1" required />
+          <input type="number" id="prod-cost" placeholder="Your cost (৳) for profit calc" min="0" value="0" />
+          <input type="text" id="prod-desc" placeholder="Short description" />
+          <input type="url" id="prod-img" placeholder="Image URL (optional – leave blank for demo pic)" />
+          <button type="submit" class="btn primary">+ Add Product</button>
+        </form>
+        <div id="product-list" class="product-grid"></div>
+      </div>
+
+      <div id="m-orders" class="panel">
+        <h3>Incoming Orders</h3>
+        <div class="order-filters">
+          <button class="chip active" data-filter="all" onclick="filterOrders('all')">All</button>
+          <button class="chip" data-filter="pending" onclick="filterOrders('pending')">Pending</button>
+          <button class="chip" data-filter="supplied" onclick="filterOrders('supplied')">Supplied</button>
+        </div>
+        <div id="order-list" class="order-list"></div>
+      </div>
+
+      <div id="m-stats" class="panel">
+        <h3>Sales Overview</h3>
+        <div class="stats-cards">
+          <div class="stat-card"><span class="label">Total Orders</span><span id="stat-orders">0</span></div>
+          <div class="stat-card"><span class="label">Items Sold</span><span id="stat-items">0</span></div>
+          <div class="stat-card"><span class="label">Revenue</span><span id="stat-revenue">৳0</span></div>
+          <div class="stat-card"><span class="label">Est. Profit</span><span id="stat-profit">৳0</span></div>
+        </div>
+        <h4>Product Performance</h4>
+        <div class="table-wrap">
+          <table id="sales-table">
+            <thead>
+              <tr><th>Product</th><th>Sold</th><th>Revenue</th><th>Profit</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <h4>Sales Chart</h4>
+        <div class="chart-wrap"><canvas id="sales-chart" height="220"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Customer Dashboard -->
+    <section id="customer-dash" class="screen">
+      <header class="topbar">
+        <div class="brand">🛍️ Ebazaar <span class="role-tag customer">Customer</span></div>
+        <div class="user-info">
+          <span id="c-name">Customer</span>
+          <button class="btn small" onclick="logout()">Logout</button>
+        </div>
+      </header>
+      <div class="search-bar">
+        <input type="text" id="search-input" placeholder="Search products (e.g. rice, phone, shirt, medicine)..." oninput="searchProducts()" />
+        <select id="customer-location" onchange="searchProducts()">
+          <option value="Dhanmondi">My Area: Dhanmondi</option>
+          <option value="Gulshan">My Area: Gulshan</option>
+          <option value="Mirpur">My Area: Mirpur</option>
+          <option value="Uttara">My Area: Uttara</option>
+          <option value="Banani">My Area: Banani</option>
+          <option value="Mohakhali">My Area: Mohakhali</option>
+        </select>
+      </div>
+      <nav class="tabs-nav">
+        <button class="nav-tab active" data-panel="c-browse" onclick="showCustomerPanel('c-browse')">Browse / Search</button>
+        <button class="nav-tab" data-panel="c-orders" onclick="showCustomerPanel('c-orders')">My Orders</button>
+        <button class="nav-tab" data-panel="c-profile" onclick="showCustomerPanel('c-profile')">My Profile</button>
+      </nav>
+      <div id="c-browse" class="panel active">
+        <div id="search-results" class="product-grid"></div>
+        <div id="empty-search" class="empty-state">Type a product name above. Results are sorted by shop rating (higher first), then by nearness to your area.</div>
+      </div>
+      <div id="c-orders" class="panel">
+        <div id="customer-orders" class="order-list"></div>
+      </div>
+
+      <div id="c-profile" class="panel">
+        <h3>My Profile</h3>
+        <p style="color:#64748b;margin-bottom:1rem;font-size:0.9rem;">Set your personal details (no shop name needed).</p>
+        <form id="customer-profile-form" onsubmit="saveCustomerProfile(event)" class="form-grid">
+          <label>Full Name <input type="text" id="c-prof-name" required /></label>
+          <label>Phone <input type="tel" id="c-prof-phone" required /></label>
+          <label>Address <input type="text" id="c-prof-address" placeholder="Home / delivery address" /></label>
+          <label>Area / Location
+            <select id="c-prof-location">
+              <option value="Dhanmondi">Dhanmondi, Dhaka</option>
+              <option value="Gulshan">Gulshan, Dhaka</option>
+              <option value="Mirpur">Mirpur, Dhaka</option>
+              <option value="Uttara">Uttara, Dhaka</option>
+              <option value="Banani">Banani, Dhaka</option>
+              <option value="Mohakhali">Mohakhali, Dhaka</option>
+              <option value="Chittagong">Chittagong</option>
+              <option value="Sylhet">Sylhet</option>
+            </select>
+          </label>
+          <button type="submit" class="btn primary">Save Profile</button>
+        </form>
+        <div id="c-profile-saved" class="success-msg hidden">Profile saved successfully!</div>
+      </div>
+    </section>
+
+    <!-- Order Modal -->
+    <div id="order-modal" class="modal hidden">
+      <div class="modal-content">
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+        <h3>Place Order</h3>
+        <div id="modal-product-info"></div>
+        <label>Quantity <input type="number" id="order-qty" value="1" min="1" /></label>
+        <label>Delivery Address <input type="text" id="order-address" placeholder="Your full address" /></label>
+        <label>Phone <input type="tel" id="order-phone" placeholder="01XXXXXXXXX" /></label>
+        <button class="btn primary" onclick="confirmOrder()">Confirm Order</button>
+      </div>
+    </div>
+
+    <!-- Rate Modal -->
+    <div id="rate-modal" class="modal hidden">
+      <div class="modal-content">
+        <button class="close-modal" onclick="closeModal()">&times;</button>
+        <h3>Rate this Shop</h3>
+        <div id="rate-shop-name"></div>
+        <div class="stars" id="star-rating">
+          <span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span>
+        </div>
+        <button class="btn primary" onclick="submitRating()">Submit Rating</button>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+  </div>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
